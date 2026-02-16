@@ -1,193 +1,67 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>OneClickDR — Shock Demo (Lite)</title>
-  <style>
-    :root{
-      --bg:#0b0f17; --panel:#0f1626; --border:#1c2333;
-      --text:#e6e9f2; --muted:#8b93a7;
-      --good:#3ddc97; --warn:#ffd166; --bad:#ff5a5a; --accent:#7aa2ff;
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-      background:
-        radial-gradient(1200px 700px at 10% 10%, rgba(122,162,255,.18), transparent 55%),
-        radial-gradient(900px 600px at 90% 20%, rgba(61,220,151,.12), transparent 55%),
-        radial-gradient(900px 600px at 50% 110%, rgba(255,90,90,.14), transparent 55%),
-        var(--bg);
-    }
-    .wrap{max-width:1100px;margin:0 auto;padding:22px}
-    .nav{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:12px 14px;border:1px solid var(--border);border-radius:14px;
-      background:rgba(15,22,38,.55);backdrop-filter: blur(10px);
-    }
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
-    .logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg, rgba(122,162,255,.95), rgba(61,220,151,.85))}
-    .btn{
-      border:1px solid var(--border); background:rgba(15,22,38,.65); color:var(--text);
-      padding:9px 12px;border-radius:12px; font-weight:700; cursor:pointer;
-    }
-    .btn.primary{border-color:rgba(122,162,255,.4); background:linear-gradient(135deg, rgba(122,162,255,.95), rgba(122,162,255,.55))}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
-    .card{
-      border:1px solid var(--border);border-radius:var(--radius);
-      background:rgba(15,22,38,.55);backdrop-filter: blur(10px);
-      padding:16px; overflow:hidden;
-    }
-    h1{margin:8px 0 10px;font-size:30px;line-height:1.15}
-    .sub{color:var(--muted);line-height:1.6}
-    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-    .kpi{border:1px solid var(--border);border-radius:14px;background:rgba(11,15,23,.35);padding:10px}
-    .kpi .l{color:var(--muted);font-size:12px}
-    .kpi .v{font-weight:900;font-size:22px;margin-top:6px}
-    .risk.low{color:var(--good)} .risk.med{color:var(--warn)} .risk.high{color:var(--bad)}
-    .hint{color:var(--muted);font-size:12px;margin-top:10px}
-    .chart{
-      margin-top:12px;border:1px solid var(--border);border-radius:14px;background:rgba(11,15,23,.35);
-      padding:12px;
-    }
-    .row{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
-    .line{
-      height:120px;border-radius:12px; margin-top:10px;
-      background: linear-gradient(180deg, rgba(255,90,90,.18), transparent 60%),
-                  radial-gradient(600px 160px at 70% 55%, rgba(255,90,90,.25), transparent 60%),
-                  rgba(13,20,34,.55);
-      position:relative; overflow:hidden;
-    }
-    .pulse{
-      position:absolute; left:72%; top:30%;
-      width:14px;height:14px;border-radius:50%;
-      background:rgba(255,90,90,.95);
-      box-shadow:0 0 18px rgba(255,90,90,.65);
-      opacity:.9;
-      animation:p 1.6s ease-in-out infinite;
-    }
-    @keyframes p{0%{transform:scale(.85)}50%{transform:scale(1.2)}100%{transform:scale(.85)}}
-    .tag{
-      margin-top:10px;display:inline-block;
-      padding:7px 10px;border-radius:999px;border:1px solid rgba(61,220,151,.35);
-      background:rgba(19,42,31,.55);color:var(--good);font-weight:900;font-size:12px;
-    }
-    .tag.off{border-color:rgba(255,90,90,.35);background:rgba(255,90,90,.12);color:var(--bad)}
-    @media (max-width:960px){.grid{grid-template-columns:1fr}}
-  </style>
-</head>
+<script>
+// ===== stock-like curve =====
+const line = document.getElementById('mainLine');
+const fill = document.getElementById('dangerFill');
+const dot  = document.getElementById('spikeDot');
 
-<body>
-  <div class="wrap">
-    <div class="nav">
-      <div class="brand"><div class="logo"></div>OneClickDR <span style="color:var(--muted);font-weight:700">• Shock Demo</span></div>
-      <button class="btn primary" id="btnDemo">Play 30s Incident</button>
-    </div>
+function buildPath(values){
+  const w = 600;
+  const h = 140;
+  const step = w/(values.length-1);
+  return values.map((v,i)=>{
+    const x = i*step;
+    const y = h - v;
+    return `${i===0?'M':'L'}${x},${y}`;
+  }).join(' ');
+}
 
-    <div class="grid">
-      <div class="card">
-        <h1>AI 商品產線失控時，你會第一時間知道嗎？</h1>
-        <div class="sub">
-          即時看見批量商品描述生成的成本/異常/風險，並在失控擴大前一鍵踩煞車。
-        </div>
-        <div class="hint">如果你現在看到這段字與按鈕，代表 HTML 正常顯示 ✅（不再是一片黑）</div>
-      </div>
-
-      <div class="card" id="dash">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-weight:900">Dashboard Preview</div>
-          <div id="guard" class="tag off">🛡 Guard OFF</div>
-        </div>
-
-        <div class="kpis">
-          <div class="kpi">
-            <div class="l">AI Risk Score</div>
-            <div id="risk" class="v risk low">38 🟢 LOW</div>
-          </div>
-          <div class="kpi">
-            <div class="l">Today Cost</div>
-            <div id="cost" class="v">$3.24</div>
-          </div>
-          <div class="kpi">
-            <div class="l">Anomalies</div>
-            <div id="anom" class="v">0</div>
-          </div>
-        </div>
-
-        <div class="chart">
-          <div class="row">
-            <div>Cost per minute</div>
-            <div>Baseline: <b style="color:var(--text)">$0.15</b></div>
-          </div>
-          <div class="line">
-            <div class="pulse" id="pulse" style="display:none"></div>
-          </div>
-          <div class="hint" id="msg">Status: Normal</div>
-
-          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn primary" id="btnLimit">🛡 Apply Cost Limit</button>
-            <button class="btn" id="btnReset">↻ Reset</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const elRisk = document.getElementById('risk');
-    const elCost = document.getElementById('cost');
-    const elAnom = document.getElementById('anom');
-    const elMsg  = document.getElementById('msg');
-    const elGuard= document.getElementById('guard');
-    const elPulse= document.getElementById('pulse');
-
-    function setNormal(){
-      elRisk.className = 'v risk low';
-      elRisk.textContent = '38 🟢 LOW';
-      elCost.textContent = '$3.24';
-      elAnom.textContent = '0';
-      elMsg.textContent  = 'Status: Normal';
-      elGuard.className  = 'tag off';
-      elGuard.textContent= '🛡 Guard OFF';
-      elPulse.style.display = 'none';
+function buildFill(values){
+  const w = 600;
+  const h = 140;
+  const step = w/(values.length-1);
+  let path = `M0,95`;
+  values.forEach((v,i)=>{
+    const x = i*step;
+    const y = h - v;
+    if(y < 95){
+      path += ` L${x},${y}`;
     }
+  });
+  path += ` L${w},95 Z`;
+  return path;
+}
 
-    function setIncident(){
-      elRisk.className = 'v risk high';
-      elRisk.textContent = '74 🔴 HIGH';
-      elCost.textContent = '$12.84';
-      elAnom.textContent = '2';
-      elMsg.textContent  = '⚠ Cost spike detected (+38% vs baseline)';
-      elPulse.style.display = 'block';
-    }
+function drawNormal(){
+  const data = [20,22,21,23,22,24,23,25,24,23];
+  line.setAttribute('d', buildPath(data));
+  fill.setAttribute('d', '');
+  dot.style.display = 'none';
+}
 
-    function setControlled(){
-      elRisk.className = 'v risk med';
-      elRisk.textContent = '61 🟡 MED';
-      elCost.textContent = '$13.02';
-      elAnom.textContent = '1';
-      elMsg.textContent  = '🛡 Guard active • Incident contained';
-      elGuard.className  = 'tag';
-      elGuard.textContent= '🛡 Guard ON';
-      elPulse.style.display = 'none';
-    }
+function drawIncident(){
+  const data = [22,24,26,28,35,60,110,95,80,70];
+  line.setAttribute('d', buildPath(data));
+  fill.setAttribute('d', buildFill(data));
 
-    async function play(){
-      setNormal();
-      await new Promise(r=>setTimeout(r, 1200));
-      setIncident();
-      await new Promise(r=>setTimeout(r, 4200));
-      setControlled();
-    }
+  // spike position
+  const w = 600/(data.length-1);
+  dot.setAttribute('cx', 6*w);
+  dot.setAttribute('cy', 140-data[6]);
+  dot.style.display = 'block';
+}
 
-    document.getElementById('btnDemo').onclick = play;
-    document.getElementById('btnLimit').onclick = setControlled;
-    document.getElementById('btnReset').onclick = setNormal;
+function drawControlled(){
+  const data = [22,24,26,28,35,60,75,65,55,48];
+  line.setAttribute('d', buildPath(data));
+  fill.setAttribute('d', buildFill(data));
+  dot.style.display = 'none';
+}
 
-    // auto play once
-    setTimeout(play, 800);
-  </script>
-</body>
-</html>
+// hook into your existing flow
+setTimeout(drawNormal, 100);
+setTimeout(drawIncident, 1800);
+setTimeout(drawControlled, 6200);
+
+document.getElementById('btnLimit').addEventListener('click', drawControlled);
+document.getElementById('btnReset').addEventListener('click', drawNormal);
+</script>
