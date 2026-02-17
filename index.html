@@ -1,648 +1,1051 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="description" content="OneClickDR — Reliability layer for AI costs. Detect and contain abnormal spend in real time." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+    content="OneClickDR — Reliability layer for AI costs. Detect and contain abnormal spend in real time." />
   <title>OneClickDR — Reliability Layer for AI Costs</title>
 
   <style>
-    :root{
+    :root {
       --bg: #070A12;
-      --panel: rgba(255,255,255,0.06);
-      --panel2: rgba(255,255,255,0.08);
-      --stroke: rgba(255,255,255,0.12);
-      --stroke2: rgba(255,255,255,0.18);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.65);
-      --muted2: rgba(255,255,255,0.52);
+      --panel: rgba(255, 255, 255, 0.06);
+      --panel2: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(255, 255, 255, 0.12);
+      --stroke2: rgba(255, 255, 255, 0.18);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.65);
+      --muted2: rgba(255, 255, 255, 0.52);
       --brand: #7C5CFF;
       --brand2: #39D3FF;
       --good: #22c55e;
       --warn: #f59e0b;
       --bad: #ef4444;
-      --shadow: 0 20px 70px rgba(0,0,0,0.55);
+      --shadow: 0 20px 70px rgba(0, 0, 0, 0.55);
       --radius: 18px;
       --radius2: 26px;
       --max: 1160px;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color: var(--text);
-      background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(124,92,255,0.22), transparent 55%),
-        radial-gradient(900px 450px at 80% 15%, rgba(57,211,255,0.18), transparent 52%),
-        radial-gradient(700px 420px at 50% 90%, rgba(239,68,68,0.10), transparent 60%),
-        var(--bg);
-      overflow-x:hidden;
+    * {
+      box-sizing: border-box
     }
 
-    a{color:inherit;text-decoration:none}
-    button{font-family:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding:0 22px;}
-    .grid{display:grid; gap:18px;}
-    .row{display:flex; gap:12px; align-items:center;}
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 12px;
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(124, 92, 255, 0.22), transparent 55%),
+        radial-gradient(900px 450px at 80% 15%, rgba(57, 211, 255, 0.18), transparent 52%),
+        radial-gradient(700px 420px at 50% 90%, rgba(239, 68, 68, 0.10), transparent 60%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 22px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
       border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.04);
+      background: rgba(255, 255, 255, 0.04);
       border-radius: 999px;
       color: var(--muted);
       font-size: 12px;
       letter-spacing: 0.2px;
     }
-    .dot{
-      width:8px;height:8px;border-radius:50%;
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
       background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 0 18px rgba(124,92,255,0.55);
+      box-shadow: 0 0 18px rgba(124, 92, 255, 0.55);
     }
 
     /* Header */
-    header{
+    header {
       position: sticky;
-      top:0;
+      top: 0;
       z-index: 50;
       backdrop-filter: blur(10px);
-      background: rgba(7,10,18,0.65);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(7, 10, 18, 0.65);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .nav{
-      display:flex; align-items:center; justify-content:space-between;
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 14px 0;
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-weight: 700;
       letter-spacing: 0.2px;
     }
-    .logoMark{
-      width:28px;height:28px;border-radius:10px;
+
+    .logoMark {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
       background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 10px 40px rgba(124,92,255,0.35);
-      position:relative;
-      overflow:hidden;
+      box-shadow: 0 10px 40px rgba(124, 92, 255, 0.35);
+      position: relative;
+      overflow: hidden;
     }
-    .logoMark:after{
-      content:"";
-      position:absolute; inset:-30%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.42), transparent 55%);
+
+    .logoMark:after {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.42), transparent 55%);
       transform: rotate(25deg);
     }
-    nav a{
+
+    nav a {
       color: var(--muted);
       font-size: 13px;
       padding: 8px 10px;
       border-radius: 10px;
     }
-    nav a:hover{background: rgba(255,255,255,0.06); color: var(--text);}
-    .navLinks{display:flex; gap:2px; align-items:center;}
-    .navActions{display:flex; gap:10px; align-items:center;}
+
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+    }
+
+    .navLinks {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+
+    .navActions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
     /* Buttons */
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:10px;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       padding: 11px 14px;
       border-radius: 14px;
       border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--text);
-      cursor:pointer;
+      cursor: pointer;
       transition: transform .08s ease, background .15s ease, border-color .15s ease;
       font-weight: 650;
       font-size: 13px;
       letter-spacing: 0.15px;
-      user-select:none;
+      user-select: none;
     }
-    .btn:hover{background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18);}
-    .btn:active{transform: translateY(1px);}
-    .btnPrimary{
-      border: 1px solid rgba(124,92,255,0.55);
-      background: linear-gradient(135deg, rgba(124,92,255,0.95), rgba(57,211,255,0.55));
-      box-shadow: 0 18px 60px rgba(124,92,255,0.25);
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
     }
-    .btnPrimary:hover{
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btnPrimary {
+      border: 1px solid rgba(124, 92, 255, 0.55);
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.95), rgba(57, 211, 255, 0.55));
+      box-shadow: 0 18px 60px rgba(124, 92, 255, 0.25);
+    }
+
+    .btnPrimary:hover {
       filter: brightness(1.03);
-      border-color: rgba(124,92,255,0.8);
+      border-color: rgba(124, 92, 255, 0.8);
     }
-    .btnGhost{
-      background: rgba(255,255,255,0.04);
+
+    .btnGhost {
+      background: rgba(255, 255, 255, 0.04);
     }
-    .btnSmall{padding: 9px 12px; border-radius: 12px; font-size: 12px;}
-    .kbd{
+
+    .btnSmall {
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .kbd {
       font-size: 11px;
-      color: rgba(255,255,255,0.75);
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(0,0,0,0.25);
+      color: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.25);
       padding: 3px 8px;
       border-radius: 10px;
     }
 
     /* Hero */
-    .hero{
+    .hero {
       padding: 52px 0 26px;
     }
-    .heroGrid{
-      display:grid;
+
+    .heroGrid {
+      display: grid;
       grid-template-columns: 1.15fr 0.85fr;
       gap: 22px;
       align-items: start;
     }
-    h1{
+
+    h1 {
       margin: 14px 0 12px;
       font-size: clamp(34px, 5vw, 56px);
       line-height: 1.02;
       letter-spacing: -0.8px;
     }
-    .sub{
+
+    .sub {
       margin: 0 0 18px;
       color: var(--muted);
       font-size: 16px;
       line-height: 1.5;
       max-width: 52ch;
     }
-    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin: 12px 0 16px;}
-    .valuePoints{
-      display:grid;
+
+    .ctaRow {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 12px 0 16px;
+    }
+
+    .valuePoints {
+      display: grid;
       grid-template-columns: 1fr;
       gap: 10px;
       margin-top: 12px;
       padding: 0;
       list-style: none;
     }
-    .valuePoints li{
-      display:flex; align-items:center; gap:10px;
-      color: rgba(255,255,255,0.78);
+
+    .valuePoints li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.78);
       font-size: 13px;
     }
-    .check{
-      width:18px;height:18px;border-radius:7px;
-      background: rgba(34,197,94,0.18);
-      border: 1px solid rgba(34,197,94,0.35);
-      display:inline-flex; align-items:center; justify-content:center;
-      color: rgba(34,197,94,0.95);
+
+    .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 7px;
+      background: rgba(34, 197, 94, 0.18);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(34, 197, 94, 0.95);
       font-weight: 900;
       line-height: 0;
     }
 
     /* Proof bar */
-    .proofBar{
+    .proofBar {
       margin-top: 22px;
       padding: 12px 14px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.035);
       border-radius: 16px;
-      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
       color: var(--muted);
       font-size: 12.5px;
     }
-    .proofStats{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
-    .stat{
+
+    .proofStats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .stat {
       padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
-      color: rgba(255,255,255,0.75);
-      white-space:nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.22);
+      color: rgba(255, 255, 255, 0.75);
+      white-space: nowrap;
     }
 
     /* Card / section */
-    section{padding: 46px 0;}
-    .sectionHead{
+    section {
+      padding: 46px 0;
+    }
+
+    .sectionHead {
       margin-bottom: 18px;
-      display:flex; align-items:flex-end; justify-content:space-between; gap: 16px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
     }
-    .sectionHead h2{
-      margin:0;
+
+    .sectionHead h2 {
+      margin: 0;
       font-size: 24px;
-      letter-spacing:-0.3px;
+      letter-spacing: -0.3px;
     }
-    .sectionHead p{
-      margin:0;
+
+    .sectionHead p {
+      margin: 0;
       color: var(--muted);
       max-width: 56ch;
       font-size: 14px;
       line-height: 1.6;
     }
-    .card{
+
+    .card {
       border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.04);
       box-shadow: var(--shadow);
     }
-    .cardInner{padding: 18px;}
-    .twoCol{
-      display:grid;
+
+    .cardInner {
+      padding: 18px;
+    }
+
+    .twoCol {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 18px;
     }
-    .threeCol{
-      display:grid;
+
+    .threeCol {
+      display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 18px;
     }
-    .muted{color: var(--muted)}
-    .tiny{color: var(--muted2); font-size:12px; line-height:1.55}
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .tiny {
+      color: var(--muted2);
+      font-size: 12px;
+      line-height: 1.55
+    }
 
     /* Problem section */
-    .problemBox{
-      display:grid;
+    .problemBox {
+      display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       gap: 18px;
       align-items: stretch;
     }
-    .callout{
+
+    .callout {
       padding: 18px;
       border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,0.10);
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.035));
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.035));
     }
-    .callout h3{margin:0 0 8px; font-size: 16px;}
-    .callout p{margin:0; color: var(--muted); font-size: 13.5px; line-height: 1.55;}
-    .tagRow{display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px;}
-    .tag{
+
+    .callout h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    .tagRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
       padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.18);
+      color: rgba(255, 255, 255, 0.7);
       font-size: 12px;
     }
 
     /* Dashboard */
-    .dash{
+    .dash {
       padding: 18px;
       border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,0.10);
+      border: 1px solid rgba(255, 255, 255, 0.10);
       background:
-        radial-gradient(900px 420px at 10% 15%, rgba(124,92,255,0.14), transparent 60%),
-        radial-gradient(700px 420px at 90% 20%, rgba(57,211,255,0.10), transparent 58%),
-        rgba(255,255,255,0.035);
-      overflow:hidden;
-      position:relative;
+        radial-gradient(900px 420px at 10% 15%, rgba(124, 92, 255, 0.14), transparent 60%),
+        radial-gradient(700px 420px at 90% 20%, rgba(57, 211, 255, 0.10), transparent 58%),
+        rgba(255, 255, 255, 0.035);
+      overflow: hidden;
+      position: relative;
     }
-    .dashTop{
-      display:flex; align-items:center; justify-content:space-between;
+
+    .dashTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 14px;
       margin-bottom: 14px;
     }
-    .dashTitle{
-      display:flex; flex-direction:column;
+
+    .dashTitle {
+      display: flex;
+      flex-direction: column;
       gap: 3px;
     }
-    .dashTitle strong{
+
+    .dashTitle strong {
       font-size: 14px;
       letter-spacing: 0.15px;
     }
-    .dashTitle span{
+
+    .dashTitle span {
       color: var(--muted2);
       font-size: 12px;
     }
 
-    .guardPill{
-      display:flex; align-items:center; gap:10px;
+    .guardPill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.22);
-      color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(0, 0, 0, 0.22);
+      color: rgba(255, 255, 255, 0.8);
       font-size: 12px;
-      white-space:nowrap;
-    }
-    .guardLight{
-      width:10px; height:10px; border-radius:50%;
-      background: rgba(34,197,94,0.85);
-      box-shadow: 0 0 18px rgba(34,197,94,0.55);
-      position:relative;
-    }
-    .guardLight.pulse{
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-    @keyframes pulse{
-      0%, 100%{transform: scale(1); box-shadow: 0 0 18px rgba(34,197,94,0.45);}
-      50%{transform: scale(1.25); box-shadow: 0 0 30px rgba(34,197,94,0.85);}
+      white-space: nowrap;
     }
 
-    .dashGrid{
-      display:grid;
+    .guardLight {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.85);
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.55);
+      position: relative;
+    }
+
+    .guardLight.pulse {
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 18px rgba(34, 197, 94, 0.45);
+      }
+
+      50% {
+        transform: scale(1.25);
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.85);
+      }
+    }
+
+    .dashGrid {
+      display: grid;
       grid-template-columns: 0.9fr 1.1fr;
       gap: 14px;
       align-items: stretch;
     }
-    .metricGrid{
-      display:grid;
+
+    .metricGrid {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    .metric{
+
+    .metric {
       padding: 12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.18);
     }
-    .metric .label{color: var(--muted2); font-size: 11px;}
-    .metric .val{
+
+    .metric .label {
+      color: var(--muted2);
+      font-size: 11px;
+    }
+
+    .metric .val {
       margin-top: 6px;
       font-size: 18px;
       font-weight: 800;
       letter-spacing: -0.2px;
     }
-    .metric .delta{
+
+    .metric .delta {
       margin-top: 6px;
       font-size: 11px;
-      color: rgba(255,255,255,0.70);
+      color: rgba(255, 255, 255, 0.70);
     }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-size: 11px;
       padding: 5px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.74);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.74);
       margin-left: 8px;
       vertical-align: middle;
     }
-    .badge b{font-weight: 800;}
-    .badge.warn{border-color: rgba(245,158,11,0.28); background: rgba(245,158,11,0.10);}
-    .badge.bad{border-color: rgba(239,68,68,0.28); background: rgba(239,68,68,0.10);}
 
-    .chartWrap{
+    .badge b {
+      font-weight: 800;
+    }
+
+    .badge.warn {
+      border-color: rgba(245, 158, 11, 0.28);
+      background: rgba(245, 158, 11, 0.10);
+    }
+
+    .badge.bad {
+      border-color: rgba(239, 68, 68, 0.28);
+      background: rgba(239, 68, 68, 0.10);
+    }
+
+    .chartWrap {
       padding: 12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      display:flex; flex-direction:column;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
       gap: 8px;
     }
-    .chartHead{display:flex; justify-content:space-between; align-items:center; gap:10px;}
-    .chartHead .title{font-size: 12px; color: rgba(255,255,255,0.78);}
-    .chartHead .meta{font-size: 11px; color: var(--muted2);}
 
-    canvas{width:100%; height: 170px; display:block;}
-    .log{
+    .chartHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chartHead .title {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .chartHead .meta {
+      font-size: 11px;
+      color: var(--muted2);
+    }
+
+    canvas {
+      width: 100%;
+      height: 170px;
+      display: block;
+    }
+
+    .log {
       margin-top: 12px;
       padding: 12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.18);
       height: 132px;
-      overflow:hidden;
-      position:relative;
+      overflow: hidden;
+      position: relative;
     }
-    .log .title{font-size: 12px; color: rgba(255,255,255,0.78); margin-bottom: 8px; display:flex; justify-content:space-between;}
-    .log ul{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;}
-    .log li{
+
+    .log .title {
       font-size: 12px;
-      color: rgba(255,255,255,0.78);
-      display:flex; justify-content:space-between; gap:12px;
+      color: rgba(255, 255, 255, 0.78);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
     }
-    .log .t{color: rgba(255,255,255,0.55);}
-    .flash{
+
+    .log ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .log li {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.78);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .log .t {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .flash {
       animation: flash 0.6s ease-in-out 1;
     }
-    @keyframes flash{
-      0%{background: rgba(239,68,68,0.25);}
-      100%{background: rgba(0,0,0,0.18);}
+
+    @keyframes flash {
+      0% {
+        background: rgba(239, 68, 68, 0.25);
+      }
+
+      100% {
+        background: rgba(0, 0, 0, 0.18);
+      }
     }
 
     /* Features */
-    .featureCard{
+    .featureCard {
       padding: 18px;
       border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.04);
     }
-    .featureCard h3{margin:0 0 8px; font-size: 15px;}
-    .featureCard p{margin:0; color: var(--muted); font-size: 13.5px; line-height: 1.55;}
-    .icon{
-      width:34px; height:34px; border-radius: 14px;
-      background: rgba(124,92,255,0.16);
-      border: 1px solid rgba(124,92,255,0.25);
-      display:flex; align-items:center; justify-content:center;
+
+    .featureCard h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .featureCard p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    .icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 14px;
+      background: rgba(124, 92, 255, 0.16);
+      border: 1px solid rgba(124, 92, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 10px;
-      box-shadow: 0 10px 30px rgba(124,92,255,0.18);
+      box-shadow: 0 10px 30px rgba(124, 92, 255, 0.18);
     }
-    .icon svg{opacity:0.9}
+
+    .icon svg {
+      opacity: 0.9
+    }
 
     /* How it works */
-    .steps{counter-reset: step;}
-    .step{
+    .steps {
+      counter-reset: step;
+    }
+
+    .step {
       padding: 18px;
       border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      position:relative;
-      overflow:hidden;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.18);
+      position: relative;
+      overflow: hidden;
     }
-    .step:before{
+
+    .step:before {
       counter-increment: step;
       content: counter(step);
-      position:absolute;
-      top: 14px; right: 14px;
-      width:28px; height:28px;
-      display:flex; align-items:center; justify-content:center;
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.72);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.72);
       font-weight: 800;
       font-size: 12px;
     }
-    .step h3{margin:0 0 8px; font-size: 15px;}
-    .step p{margin:0; color: var(--muted); font-size: 13.5px; line-height: 1.55;}
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
 
     /* Pricing */
-    .priceCard{
+    .priceCard {
       padding: 18px;
       border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.04);
-      position:relative;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.04);
+      position: relative;
     }
-    .priceCard.pop{
-      border-color: rgba(124,92,255,0.32);
-      background: linear-gradient(180deg, rgba(124,92,255,0.14), rgba(255,255,255,0.04));
-      box-shadow: 0 20px 70px rgba(124,92,255,0.14);
+
+    .priceCard.pop {
+      border-color: rgba(124, 92, 255, 0.32);
+      background: linear-gradient(180deg, rgba(124, 92, 255, 0.14), rgba(255, 255, 255, 0.04));
+      box-shadow: 0 20px 70px rgba(124, 92, 255, 0.14);
     }
-    .priceCard h3{margin:0 0 6px; font-size: 15px;}
-    .price{
+
+    .priceCard h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .price {
       font-size: 28px;
       font-weight: 900;
       letter-spacing: -0.6px;
       margin: 10px 0 6px;
     }
-    .price small{font-size: 12px; color: rgba(255,255,255,0.62); font-weight: 650;}
-    .priceList{margin: 12px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
-    .priceList li{color: rgba(255,255,255,0.74); font-size: 13px; display:flex; gap:10px; align-items:flex-start;}
-    .sep{height:1px; background: rgba(255,255,255,0.10); margin: 14px 0;}
+
+    .price small {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.62);
+      font-weight: 650;
+    }
+
+    .priceList {
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .priceList li {
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.10);
+      margin: 14px 0;
+    }
 
     /* FAQ */
-    details{
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.04);
+    details {
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.04);
       border-radius: 16px;
       padding: 12px 14px;
     }
-    details summary{
-      cursor:pointer;
+
+    details summary {
+      cursor: pointer;
       font-weight: 750;
-      color: rgba(255,255,255,0.86);
-      list-style:none;
+      color: rgba(255, 255, 255, 0.86);
+      list-style: none;
     }
-    details summary::-webkit-details-marker{display:none}
-    details p{margin: 10px 0 0; color: var(--muted); font-size: 13.5px; line-height:1.6;}
+
+    details summary::-webkit-details-marker {
+      display: none
+    }
+
+    details p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
 
     /* Final CTA */
-    .final{
+    .final {
       padding: 44px 0 64px;
     }
-    .finalBox{
+
+    .finalBox {
       padding: 22px;
       border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.12);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       background:
-        radial-gradient(900px 420px at 20% 30%, rgba(124,92,255,0.24), transparent 55%),
-        radial-gradient(700px 420px at 80% 35%, rgba(57,211,255,0.18), transparent 55%),
-        rgba(255,255,255,0.04);
+        radial-gradient(900px 420px at 20% 30%, rgba(124, 92, 255, 0.24), transparent 55%),
+        radial-gradient(700px 420px at 80% 35%, rgba(57, 211, 255, 0.18), transparent 55%),
+        rgba(255, 255, 255, 0.04);
       box-shadow: var(--shadow);
-      display:grid;
+      display: grid;
       grid-template-columns: 1.2fr 0.8fr;
       gap: 18px;
-      align-items:center;
+      align-items: center;
     }
-    .finalBox h2{margin:0 0 8px; font-size: 26px; letter-spacing:-0.3px;}
-    .finalBox p{margin:0; color: var(--muted); line-height:1.55;}
-    .finalBox .ctaRow{justify-content:flex-end}
+
+    .finalBox h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      letter-spacing: -0.3px;
+    }
+
+    .finalBox p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .finalBox .ctaRow {
+      justify-content: flex-end
+    }
 
     /* Footer */
-    footer{
+    footer {
       padding: 22px 0 34px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.58);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.58);
       font-size: 12px;
     }
-    .foot{
-      display:flex; justify-content:space-between; align-items:center; gap:12px;
-      flex-wrap:wrap;
+
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .foot a{color: rgba(255,255,255,0.70);}
-    .foot a:hover{color: rgba(255,255,255,0.9);}
+
+    .foot a {
+      color: rgba(255, 255, 255, 0.70);
+    }
+
+    .foot a:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
 
     /* Modal */
-    .modalOverlay{
+    .modalOverlay {
       position: fixed;
-      inset:0;
-      background: rgba(0,0,0,0.62);
-      display:none;
-      align-items:center;
-      justify-content:center;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      display: none;
+      align-items: center;
+      justify-content: center;
       padding: 18px;
       z-index: 100;
       backdrop-filter: blur(8px);
     }
-    .modal{
+
+    .modal {
       width: min(920px, 100%);
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(10,13,24,0.85);
-      box-shadow: 0 30px 90px rgba(0,0,0,0.75);
-      overflow:hidden;
-      position:relative;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 13, 24, 0.85);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+      position: relative;
     }
-    .modalHead{
-      display:flex; justify-content:space-between; align-items:center;
+
+    .modalHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 14px 14px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.04);
     }
-    .modalHead strong{font-size: 13px; color: rgba(255,255,255,0.86);}
-    .closeBtn{
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.86);
+
+    .modalHead strong {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .closeBtn {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.86);
       border-radius: 12px;
       padding: 8px 10px;
-      cursor:pointer;
+      cursor: pointer;
     }
-    .modalBody{padding: 14px;}
-    .videoBox{
+
+    .modalBody {
+      padding: 14px;
+    }
+
+    .videoBox {
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.35);
-      overflow:hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.35);
+      overflow: hidden;
       aspect-ratio: 16/9;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
-    .playHint{
-      position:absolute; inset:auto 14px 14px 14px;
-      display:flex; align-items:center; justify-content:space-between;
+
+    .playHint {
+      position: absolute;
+      inset: auto 14px 14px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 10px;
       padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.40);
-      color: rgba(255,255,255,0.78);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.40);
+      color: rgba(255, 255, 255, 0.78);
       font-size: 12px;
     }
-    .formGrid{
-      display:grid;
+
+    .formGrid {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 12px;
     }
-    .field{
-      display:flex; flex-direction:column; gap: 6px;
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    label{font-size: 12px; color: rgba(255,255,255,0.72);}
-    input, select, textarea{
-      width:100%;
+
+    label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
       padding: 11px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.25);
-      color: rgba(255,255,255,0.88);
-      outline:none;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(0, 0, 0, 0.25);
+      color: rgba(255, 255, 255, 0.88);
+      outline: none;
     }
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(124,92,255,0.55);
-      box-shadow: 0 0 0 4px rgba(124,92,255,0.18);
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(124, 92, 255, 0.55);
+      box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.18);
     }
-    textarea{min-height: 96px; resize: vertical;}
-    .formActions{display:flex; justify-content:flex-end; gap: 10px; margin-top: 12px;}
-    .toast{
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .formActions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .toast {
       position: fixed;
       left: 50%;
       bottom: 18px;
       transform: translateX(-50%);
       padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.55);
-      color: rgba(255,255,255,0.84);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(0, 0, 0, 0.55);
+      color: rgba(255, 255, 255, 0.84);
       font-size: 12px;
-      display:none;
+      display: none;
       z-index: 200;
       backdrop-filter: blur(8px);
     }
 
     /* Responsive */
-    @media (max-width: 980px){
-      .heroGrid{grid-template-columns: 1fr; }
-      .problemBox{grid-template-columns: 1fr;}
-      .dashGrid{grid-template-columns: 1fr;}
-      .twoCol{grid-template-columns: 1fr;}
-      .threeCol{grid-template-columns: 1fr;}
-      .finalBox{grid-template-columns: 1fr;}
-      nav{display:none}
+    @media (max-width: 980px) {
+      .heroGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .problemBox {
+        grid-template-columns: 1fr;
+      }
+
+      .dashGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .twoCol {
+        grid-template-columns: 1fr;
+      }
+
+      .threeCol {
+        grid-template-columns: 1fr;
+      }
+
+      .finalBox {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        display: none
+      }
     }
   </style>
 </head>
@@ -688,7 +1091,7 @@
             <span class="pill"><span class="dot"></span> AI cost incidents are silent — until they're expensive</span>
 
             <h1>
-              Stop AI Cost Incidents<br/>
+              Stop AI Cost Incidents<br />
               Before They Spiral
             </h1>
 
@@ -703,7 +1106,8 @@
             </div>
 
             <ul class="valuePoints" aria-label="Value points">
-              <li><span class="check">✓</span> Detect abnormal spend in seconds (prompt loops, traffic spikes, misconfigurations)</li>
+              <li><span class="check">✓</span> Detect abnormal spend in seconds (prompt loops, traffic spikes,
+                misconfigurations)</li>
               <li><span class="check">✓</span> Guard automatically intervenes before costs escalate</li>
               <li><span class="check">✓</span> Built for production GenAI apps with volatile usage patterns</li>
             </ul>
@@ -838,54 +1242,87 @@
     </section>
 
     <!-- FEATURES -->
-    <section id="features">
+    <section id="pricing">
       <div class="wrap">
         <div class="sectionHead">
           <div>
-            <h2>Three capabilities. No bloat.</h2>
-            <p>
-              YC-style: keep it short, keep it sharp. These map directly to your value.
+            <h2>Packages</h2>
+            <p>We’re onboarding early partners. We’ll propose a plan after understanding your usage and risk profile.
+            </p>
+            <p class="tiny" style="margin-top:10px;">
+              <b>Early-stage onboarding (pre-GA).</b> Packaging may evolve as the product matures.
             </p>
           </div>
         </div>
 
         <div class="threeCol">
-          <div class="featureCard">
-            <div class="icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M4 19V5m0 14h16" stroke="white" opacity="0.85" stroke-width="2" stroke-linecap="round"/>
-                <path d="M7 15l4-4 3 3 5-6" stroke="white" opacity="0.85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <h3>Real-time anomaly detection</h3>
-            <p>Spot abnormal spend and token-rate signatures in seconds, not days.</p>
+          <div class="priceCard">
+            <h3>Early Access</h3>
+            <div class="tiny">For pilots / PoC (2–4 weeks)</div>
+
+            <div class="price">Pilot</div>
+            <div class="tiny">Validate cost-risk workflows with a guided evaluation.</div>
+
+            <div class="sep"></div>
+
+            <ul class="priceList">
+              <li><span class="check">✓</span> Guided onboarding + success criteria</li>
+              <li><span class="check">✓</span> Real-time anomaly detection (core)</li>
+              <li><span class="check">✓</span> Starter Guard policies</li>
+            </ul>
+
+            <div class="sep"></div>
+            <button class="btn btnSmall" type="button" data-open-access>Request Pilot</button>
           </div>
 
-          <div class="featureCard">
-            <div class="icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z" stroke="white" opacity="0.85" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M9 12l2 2 4-5" stroke="white" opacity="0.85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <h3>Automatic Guard intervention</h3>
-            <p>Contain incidents automatically: throttle, clamp budgets, block patterns, alert.</p>
+          <div class="priceCard pop">
+            <h3>Design Partner</h3>
+            <div class="tiny">For production teams with volatile usage</div>
+
+            <div class="price">Limited</div>
+            <div class="tiny">Priority onboarding + roadmap influence (limited slots).</div>
+
+            <div class="sep"></div>
+
+            <ul class="priceList">
+              <li><span class="check">✓</span> Risk scoring + incident context</li>
+              <li><span class="check">✓</span> Guard auto-containment policies</li>
+              <li><span class="check">✓</span> Weekly partner review</li>
+            </ul>
+
+            <div class="sep"></div>
+            <button class="btn btnSmall btnPrimary" type="button" data-open-access>Become a Design Partner</button>
           </div>
 
-          <div class="featureCard">
-            <div class="icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M12 3v18" stroke="white" opacity="0.85" stroke-width="2" stroke-linecap="round"/>
-                <path d="M7 8h10M6 16h12" stroke="white" opacity="0.85" stroke-width="2" stroke-linecap="round"/>
-                <path d="M5 12h14" stroke="white" opacity="0.85" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <h3>AI cost risk intelligence</h3>
-            <p>Risk scoring and incident context so teams know what to fix — fast.</p>
+          <div class="priceCard">
+            <h3>Enterprise</h3>
+            <div class="tiny">For high-volume inference & governance</div>
+
+            <div class="price">Custom</div>
+            <div class="tiny">Security, SSO, SLAs, and advanced containment controls.</div>
+
+            <div class="sep"></div>
+
+            <ul class="priceList">
+              <li><span class="check">✓</span> Policy governance + budget guardrails</li>
+              <li><span class="check">✓</span> Advanced containment controls</li>
+              <li><span class="check">✓</span> Dedicated support / SSO / audit</li>
+            </ul>
+
+            <div class="sep"></div>
+            <button class="btn btnSmall" type="button" data-open-access>Talk to us</button>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="tiny">
+            <b>Next step:</b> Submit the form and we’ll reply with a recommended package based on your usage patterns,
+            guard policies, and rollout timeline.
           </div>
         </div>
       </div>
     </section>
+
 
     <!-- HOW IT WORKS -->
     <section id="how">
@@ -959,7 +1396,7 @@
     </section>
 
     <!-- ✅ PRICING (FINAL, SAFE) -->
-    
+
 
   </main>
 
@@ -993,7 +1430,7 @@
               <span class="dot"></span> Replace with your Loom / MP4 when ready
             </div>
             <div style="margin-top:12px; font-size: 13px; color: rgba(255,255,255,0.78); line-height: 1.55;">
-              For now, this modal demonstrates the expected user flow.<br/>
+              For now, this modal demonstrates the expected user flow.<br />
               Press <span class="kbd">Esc</span> to close.
             </div>
           </div>
@@ -1044,7 +1481,8 @@
 
           <div class="field" style="margin-top:12px;">
             <label for="notes">What’s your biggest AI cost risk right now?</label>
-            <textarea id="notes" name="notes" placeholder="e.g., token spikes from agents, prompt loops, retries, unpredictable usage..."></textarea>
+            <textarea id="notes" name="notes"
+              placeholder="e.g., token spikes from agents, prompt loops, retries, unpredictable usage..."></textarea>
           </div>
 
           <div class="formActions">
@@ -1066,15 +1504,15 @@
     // --------------------------
     // Utilities
     // --------------------------
-    const $ = (s, el=document) => el.querySelector(s);
-    const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+    const $ = (s, el = document) => el.querySelector(s);
+    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
-    function showToast(msg){
+    function showToast(msg) {
       const t = $("#toast");
       t.textContent = msg;
       t.style.display = "block";
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=> t.style.display="none", 2200);
+      showToast._t = setTimeout(() => t.style.display = "none", 2200);
     }
 
     // --------------------------
@@ -1088,22 +1526,22 @@
     const demoOverlay = $("#demoOverlay");
     const accessOverlay = $("#accessOverlay");
 
-    function openModal(overlay){
+    function openModal(overlay) {
       overlay.style.display = "flex";
       overlay.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
     }
-    function closeModals(){
-      [demoOverlay, accessOverlay].forEach(o=>{
+    function closeModals() {
+      [demoOverlay, accessOverlay].forEach(o => {
         o.style.display = "none";
         o.setAttribute("aria-hidden", "true");
       });
       document.body.style.overflow = "";
     }
 
-    function wireOverlay(overlay){
-      overlay.addEventListener("click", (e)=>{
-        if(e.target === overlay) closeModals();
+    function wireOverlay(overlay) {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeModals();
       });
       $$("[data-close]", overlay).forEach(btn => btn.addEventListener("click", closeModals));
     }
@@ -1111,8 +1549,8 @@
     wireOverlay(accessOverlay);
 
     // Buttons open
-    const openDemo = ()=> openModal(demoOverlay);
-    const openAccess = ()=> openModal(accessOverlay);
+    const openDemo = () => openModal(demoOverlay);
+    const openAccess = () => openModal(accessOverlay);
 
     $("#btnDemoTop").addEventListener("click", openDemo);
     $("#btnAccessTop").addEventListener("click", openAccess);
@@ -1123,16 +1561,16 @@
     $$("[data-open-access]").forEach(btn => btn.addEventListener("click", openAccess));
 
     // Keyboard shortcuts
-    window.addEventListener("keydown", (e)=>{
-      if(e.key === "Escape") closeModals();
-      if(e.key.toLowerCase() === "d") openDemo();
-      if(e.key.toLowerCase() === "e") openAccess();
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModals();
+      if (e.key.toLowerCase() === "d") openDemo();
+      if (e.key.toLowerCase() === "e") openAccess();
     });
 
     // --------------------------
     // Early access form (front-end placeholder)
     // --------------------------
-    $("#accessForm").addEventListener("submit", async (e)=>{
+    $("#accessForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.currentTarget;
       const data = Object.fromEntries(new FormData(form).entries());
@@ -1179,75 +1617,75 @@
     let tokenRate = 1.2; // M/hr
     let slope = 0.8;
 
-    function fmtMoney(n){
+    function fmtMoney(n) {
       return "$" + Math.round(n).toLocaleString();
     }
-    function fmtM(n){
+    function fmtM(n) {
       return n.toFixed(1) + "M";
     }
-    function setBadge(level){
-      riskBadge.classList.remove("warn","bad");
-      if(level === "Elevated"){
+    function setBadge(level) {
+      riskBadge.classList.remove("warn", "bad");
+      if (level === "Elevated") {
         riskBadge.classList.add("warn");
         riskBadge.innerHTML = "<b>Elevated</b>";
-      }else if(level === "Critical"){
+      } else if (level === "Critical") {
         riskBadge.classList.add("bad");
         riskBadge.innerHTML = "<b>Critical</b>";
-      }else{
+      } else {
         riskBadge.innerHTML = "<b>Normal</b>";
       }
     }
 
-    function pushLog(msg, kind="info"){
+    function pushLog(msg, kind = "info") {
       const t = new Date();
-      const ts = t.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+      const ts = t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       const li = document.createElement("li");
       li.innerHTML = `<span>${msg}</span><span class="t">${ts}</span>`;
       logList.prepend(li);
-      while(logList.children.length > 6) logList.removeChild(logList.lastChild);
+      while (logList.children.length > 6) logList.removeChild(logList.lastChild);
 
-      if(kind === "alert"){
+      if (kind === "alert") {
         logBox.classList.remove("flash");
         void logBox.offsetWidth;
         logBox.classList.add("flash");
       }
     }
 
-    function drawChart(){
-      ctx.clearRect(0,0,W,H);
+    function drawChart() {
+      ctx.clearRect(0, 0, W, H);
 
       // background grid
       ctx.globalAlpha = 0.25;
       ctx.strokeStyle = "rgba(255,255,255,0.18)";
       ctx.lineWidth = 1;
-      for(let i=1;i<5;i++){
-        const y = (H/5)*i;
+      for (let i = 1; i < 5; i++) {
+        const y = (H / 5) * i;
         ctx.beginPath();
-        ctx.moveTo(0,y);
-        ctx.lineTo(W,y);
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
 
-      if(points.length < 2) return;
+      if (points.length < 2) return;
 
       const min = Math.min(...points);
       const max = Math.max(...points);
-      const pad = (max-min) * 0.18 + 1;
+      const pad = (max - min) * 0.18 + 1;
       const lo = min - pad;
       const hi = max + pad;
 
-      const xStep = W / (maxPoints-1);
+      const xStep = W / (maxPoints - 1);
 
       // line
       ctx.lineWidth = 2.2;
       ctx.strokeStyle = "rgba(57,211,255,0.85)";
       ctx.beginPath();
-      points.forEach((v,i)=>{
-        const x = i*xStep;
-        const y = H - ((v - lo) / (hi - lo)) * (H-10) - 5;
-        if(i===0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
+      points.forEach((v, i) => {
+        const x = i * xStep;
+        const y = H - ((v - lo) / (hi - lo)) * (H - 10) - 5;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       });
       ctx.stroke();
 
@@ -1259,92 +1697,92 @@
       ctx.globalAlpha = 1;
 
       // last point
-      const last = points[points.length-1];
-      const lx = (points.length-1)*xStep;
-      const ly = H - ((last - lo) / (hi - lo)) * (H-10) - 5;
+      const last = points[points.length - 1];
+      const lx = (points.length - 1) * xStep;
+      const ly = H - ((last - lo) / (hi - lo)) * (H - 10) - 5;
       ctx.fillStyle = "rgba(255,255,255,0.92)";
       ctx.beginPath();
-      ctx.arc(lx, ly, 3.8, 0, Math.PI*2);
+      ctx.arc(lx, ly, 3.8, 0, Math.PI * 2);
       ctx.fill();
 
       // value label
       ctx.font = "12px ui-sans-serif, system-ui";
       ctx.fillStyle = "rgba(255,255,255,0.78)";
-      ctx.fillText(fmtMoney(last), Math.max(10, lx-70), Math.max(16, ly-10));
+      ctx.fillText(fmtMoney(last), Math.max(10, lx - 70), Math.max(16, ly - 10));
     }
 
     // Seed points
-    for(let i=0;i<maxPoints;i++){
-      points.push(spend + (Math.sin(i/6)*14) + (Math.random()*8));
+    for (let i = 0; i < maxPoints; i++) {
+      points.push(spend + (Math.sin(i / 6) * 14) + (Math.random() * 8));
     }
     drawChart();
 
-    function step(){
+    function step() {
       tick++;
 
       // Phase transitions
-      if(tick === 30){ phase = 1; pushLog("Sim: prompt loop begins", "alert"); }
-      if(tick === 55){ phase = 2; pushLog("Anomaly detected — Guard activating", "alert"); }
-      if(tick === 85){ phase = 3; pushLog("Incident contained — spend stabilized", "info"); }
+      if (tick === 30) { phase = 1; pushLog("Sim: prompt loop begins", "alert"); }
+      if (tick === 55) { phase = 2; pushLog("Anomaly detected — Guard activating", "alert"); }
+      if (tick === 85) { phase = 3; pushLog("Incident contained — spend stabilized", "info"); }
 
       // Update numbers by phase
-      if(phase === 0){
-        risk += (Math.random()*2 - 1) * 0.6;
-        tokenRate += (Math.random()*2 - 1) * 0.06;
-        slope = 0.6 + Math.random()*0.6;
-      } else if(phase === 1){
-        risk += 1.4 + Math.random()*0.8;
-        tokenRate += 0.18 + Math.random()*0.10;
-        slope = 2.2 + Math.random()*1.2;
-        if(tick % 10 === 0) pushLog("Spend slope increasing", "alert");
-      } else if(phase === 2){
-        risk += (Math.random()*2 - 1) * 0.9;
-        tokenRate += (Math.random()*2 - 1) * 0.12 - 0.08;
-        slope = 0.4 + Math.random()*0.7;
-        if(tick % 12 === 0) pushLog("Guard policy: throttle + clamp", "info");
+      if (phase === 0) {
+        risk += (Math.random() * 2 - 1) * 0.6;
+        tokenRate += (Math.random() * 2 - 1) * 0.06;
+        slope = 0.6 + Math.random() * 0.6;
+      } else if (phase === 1) {
+        risk += 1.4 + Math.random() * 0.8;
+        tokenRate += 0.18 + Math.random() * 0.10;
+        slope = 2.2 + Math.random() * 1.2;
+        if (tick % 10 === 0) pushLog("Spend slope increasing", "alert");
+      } else if (phase === 2) {
+        risk += (Math.random() * 2 - 1) * 0.9;
+        tokenRate += (Math.random() * 2 - 1) * 0.12 - 0.08;
+        slope = 0.4 + Math.random() * 0.7;
+        if (tick % 12 === 0) pushLog("Guard policy: throttle + clamp", "info");
       } else {
-        risk += (Math.random()*2 - 1) * 0.5 - 0.2;
-        tokenRate += (Math.random()*2 - 1) * 0.07 - 0.03;
-        slope = 0.35 + Math.random()*0.4;
-        if(tick % 20 === 0) pushLog("Normal variance restored", "info");
+        risk += (Math.random() * 2 - 1) * 0.5 - 0.2;
+        tokenRate += (Math.random() * 2 - 1) * 0.07 - 0.03;
+        slope = 0.35 + Math.random() * 0.4;
+        if (tick % 20 === 0) pushLog("Normal variance restored", "info");
       }
 
       risk = Math.max(12, Math.min(95, risk));
       tokenRate = Math.max(0.4, Math.min(4.6, tokenRate));
 
       // Spend changes
-      spend += slope * 10 + (Math.random()*6 - 3);
-      if(phase >= 2){
-        spend -= 6 + Math.random()*4;
+      spend += slope * 10 + (Math.random() * 6 - 3);
+      if (phase >= 2) {
+        spend -= 6 + Math.random() * 4;
       }
       spend = Math.max(420, spend);
 
       // Update UI
       riskEl.textContent = Math.round(risk);
 
-      if(risk >= 78){
+      if (risk >= 78) {
         setBadge("Critical");
         riskHint.textContent = "Runaway signature — containment required";
-      }else if(risk >= 55){
+      } else if (risk >= 55) {
         setBadge("Elevated");
         riskHint.textContent = phase >= 2 ? "Guard mitigating anomaly" : "Prompt loop signature detected";
-      }else{
+      } else {
         setBadge("Normal");
         riskHint.textContent = "Within expected variance";
       }
 
       spendTodayEl.textContent = fmtMoney(spend);
-      const delta = (Math.sin(tick/12)*8 + (phase===1? 18 : phase===2? 6 : 10));
-      spendDeltaEl.textContent = (delta>0? "+" : "") + Math.round(delta) + "% vs yesterday";
+      const delta = (Math.sin(tick / 12) * 8 + (phase === 1 ? 18 : phase === 2 ? 6 : 10));
+      spendDeltaEl.textContent = (delta > 0 ? "+" : "") + Math.round(delta) + "% vs yesterday";
 
       tokenRateEl.textContent = fmtM(tokenRate);
       tokenHint.textContent = phase === 1 ? "Spike detected" : "High variance workload";
 
-      if(phase < 2){
+      if (phase < 2) {
         containmentEl.textContent = "Standby";
         containHint.textContent = "Policies armed";
         chartMeta.textContent = "Watching spend slope";
-      } else if(phase === 2){
+      } else if (phase === 2) {
         containmentEl.textContent = "Active";
         containHint.textContent = "Auto-throttle + budget clamp";
         chartMeta.textContent = "Guard containing the incident";
@@ -1356,7 +1794,7 @@
 
       // chart points
       points.push(spend);
-      if(points.length > maxPoints) points.shift();
+      if (points.length > maxPoints) points.shift();
       drawChart();
     }
 
@@ -1371,14 +1809,15 @@
     const statInc = $("#statIncidents");
     const statLat = $("#statLatency");
     let ps = 1.8, pi = 42, pl = 2.7;
-    setInterval(()=>{
-      ps += (Math.random()*0.03);
+    setInterval(() => {
+      ps += (Math.random() * 0.03);
       pi += (Math.random() < 0.15 ? 1 : 0);
-      pl += (Math.random()*0.06 - 0.03);
+      pl += (Math.random() * 0.06 - 0.03);
       statSpend.textContent = "$" + ps.toFixed(2) + "M";
       statInc.textContent = String(pi);
       statLat.textContent = Math.max(1.8, pl).toFixed(1) + "s";
     }, 2600);
   </script>
 </body>
+
 </html>
