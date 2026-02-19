@@ -1,4 +1,4 @@
-name: AI Security + Architecture Review
+name: AI Security + Architecture Review  ## New remark
 
 on:
   pull_request:
