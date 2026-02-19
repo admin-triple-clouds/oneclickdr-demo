@@ -1,0 +1,157 @@
+name: AI Security + Architecture Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ai_review:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR diff (bounded)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # Get diff via GitHub API
+          gh api \
+            -H "Accept: application/vnd.github.v3.diff" \
+            "/repos/${GITHUB_REPOSITORY}/pulls/${PR}" > pr.diff
+
+          python - <<'PY'
+          cap = 180_000  # ~180KB to control cost
+          p = "pr.diff"
+          data = open(p, "rb").read()
+          if len(data) > cap:
+              data = data[:cap] + b"\n\n---\n[TRUNCATED: diff too large]\n"
+              open(p, "wb").write(data)
+          print("diff_bytes", len(data))
+          PY
+
+      - name: Redact obvious secrets (basic)
+        run: |
+          python - <<'PY'
+          import re
+          p = "pr.diff"
+          s = open(p, "r", encoding="utf-8", errors="replace").read()
+
+          patterns = [
+            (r'sk-[A-Za-z0-9]{16,}', 'sk-[REDACTED]'),
+            (r'ghp_[A-Za-z0-9]{20,}', 'ghp_[REDACTED]'),
+            (r'(?i)\b(password|passwd|secret|token|api[_-]?key)\b\s*[:=]\s*["\']?([^\s"\']{8,})["\']?', r'\1: [REDACTED]'),
+          ]
+          for pat, rep in patterns:
+              s = re.sub(pat, rep, s)
+
+          open(p, "w", encoding="utf-8").write(s)
+          PY
+
+      - name: Build AI prompt
+        run: |
+          cat > prompt.txt <<'EOF'
+          You are a senior security engineer and software architect doing a PR review.
+
+          Focus:
+          - Security: authn/authz, injection, secrets leakage, permissions, SSRF, deserialization, supply chain, crypto misuse, data leakage, logging/PII.
+          - Architecture: module boundaries, coupling, API design, error handling, scalability, reliability, observability.
+
+          Requirements:
+          - Be specific: cite file paths / functions / diff hunks.
+          - Provide concrete fixes and suggested tests.
+          - If diff is truncated, state assumptions and request missing context.
+
+          Output (Markdown):
+          1) Summary (3-6 bullets)
+          2) Security Findings (table: Severity | Area | Finding | Evidence | Fix)
+          3) Architecture Findings (table: Severity | Area | Finding | Evidence | Fix)
+          4) Suggested Tests
+          5) Questions / Missing Context
+          6) Quick Wins (<=5 bullets)
+
+          Severity: Critical / High / Medium / Low / Info
+          EOF
+
+      - name: Call OpenAI (Responses API)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, json, urllib.request
+
+          api_key = os.environ["OPENAI_API_KEY"]
+          model = os.environ.get("AI_REVIEW_MODEL", "gpt-4.1-mini")
+
+          prompt = open("prompt.txt", "r", encoding="utf-8").read()
+          diff = open("pr.diff", "r", encoding="utf-8", errors="replace").read()
+
+          payload = {
+            "model": model,
+            "input": [
+              {"role": "system", "content": "You produce thorough yet concise security + architecture PR reviews."},
+              {"role": "user", "content": prompt + "\n\n---\nPR DIFF:\n\n" + diff}
+            ]
+          }
+
+          req = urllib.request.Request(
+            "https://api.openai.com/v1/responses",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+              "Authorization": f"Bearer {api_key}",
+              "Content-Type": "application/json",
+            },
+            method="POST"
+          )
+
+          with urllib.request.urlopen(req, timeout=180) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+          text = ""
+          for item in data.get("output", []):
+            if item.get("type") == "message":
+              for c in item.get("content", []):
+                if c.get("type") == "output_text":
+                  text += c.get("text", "")
+
+          if not text.strip():
+            text = "AI returned no text output."
+
+          open("review.md", "w", encoding="utf-8").write(text.strip() + "\n")
+          print("review.md written")
+          PY
+
+      - name: Post PR comment + Review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          txt = open("review.md", "r", encoding="utf-8").read()
+          cap = 60000
+          if len(txt) > cap:
+              txt = txt[:cap] + "\n\n---\n[TRUNCATED]\n"
+          open("review_trimmed.md", "w", encoding="utf-8").write(txt)
+          PY
+
+          gh pr comment "$PR" --body "$(printf "## 🤖 AI Security + Architecture Review (Comment)\n\n"; cat review_trimmed.md)"
+          gh pr review  "$PR" --comment --body "$(printf "## 🤖 AI Security + Architecture Review (Review)\n\n"; cat review_trimmed.md)"
+
